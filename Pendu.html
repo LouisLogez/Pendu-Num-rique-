@@ -8,6 +8,20 @@
     <link rel="stylesheet" href="style_pendu.css">
 </head>
 <body>
+    <!-- Popup victoire -->
+    <div id="popup-victoire" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(102,166,255,0.25); z-index:4000; align-items:center; justify-content:center;">
+        <div style="background:#fff; border-radius:24px; box-shadow:0 12px 40px rgba(44,62,80,0.18); padding:48px 36px 36px 36px; text-align:center; max-width:340px; margin:auto; position:relative;">
+            <h2 style="color:#27ae60; font-size:2em; margin-bottom:18px; font-family:'Montserrat',Arial,sans-serif;">Bravo vous avez gagné !</h2>
+            <button id="btn-fermer-victoire" style="margin-top:18px; background:linear-gradient(90deg, #66a6ff 0%, #89f7fe 100%); color:#fff; border:none; border-radius:30px; padding:12px 32px; font-size:1.08em; font-family:'Montserrat',Arial,sans-serif; font-weight:600; letter-spacing:0.05em; cursor:pointer; transition:background 0.2s, transform 0.15s, box-shadow 0.2s; box-shadow:0 2px 8px rgba(102,166,255,0.10);">Fermer</button>
+        </div>
+    </div>
+    <!-- Popup défaite -->
+    <div id="popup-defaite" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(231,76,60,0.18); z-index:4000; align-items:center; justify-content:center;">
+        <div style="background:#fff; border-radius:24px; box-shadow:0 12px 40px rgba(231,76,60,0.13); padding:48px 36px 36px 36px; text-align:center; max-width:340px; margin:auto; position:relative;">
+            <h2 style="color:#e74c3c; font-size:2em; margin-bottom:18px; font-family:'Montserrat',Arial,sans-serif;">Dommage vous avez perdu...</h2>
+            <button id="btn-fermer-defaite" style="margin-top:18px; background:linear-gradient(90deg, #e74c3c 0%, #ff7675 100%); color:#fff; border:none; border-radius:30px; padding:12px 32px; font-size:1.08em; font-family:'Montserrat',Arial,sans-serif; font-weight:600; letter-spacing:0.05em; cursor:pointer; transition:background 0.2s, transform 0.15s, box-shadow 0.2s; box-shadow:0 2px 8px rgba(231,76,60,0.10);">Fermer</button>
+        </div>
+    </div>
     <svg id="cables-bg" width="100vw" height="100vh" viewBox="0 0 1920 1080" preserveAspectRatio="none" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;pointer-events:none;filter:blur(2.5px) opacity(0.7);">
         <defs>
             <linearGradient id="circuitGrad1" x1="0" y1="0" x2="1" y2="1">
@@ -138,12 +152,20 @@
             <button id="btn-retour-accueil" style="margin-top:18px; background:linear-gradient(90deg, #66a6ff 0%, #89f7fe 100%); color:#fff; border:none; border-radius:30px; padding:12px 32px; font-size:1.08em; font-family:'Montserrat',Arial,sans-serif; font-weight:600; letter-spacing:0.05em; cursor:pointer; transition:background 0.2s, transform 0.15s, box-shadow 0.2s; box-shadow:0 2px 8px rgba(102,166,255,0.10);">Retour</button>
         </div>
     </div>
-    <!-- Container pour le scoreboard -->
-    <div id="scoreboard-container" style="display:none; position:fixed; top:68px; right:24px; z-index:3500; align-items:flex-start; justify-content:flex-end; width:auto; height:auto; background:none; box-shadow:none;">
-        <div style="background:#fff; border-radius:18px; box-shadow:0 8px 32px rgba(0,0,0,0.15); padding:32px 28px 28px 28px; text-align:center; max-width:340px; min-width:220px; margin:0;">
-            <h2 style="color:#2d3a4b; margin-bottom:18px;">Meilleurs temps</h2>
-            <ol id="scoreboard-list" style="font-size:1.15em; color:#2980b9; margin-bottom:18px;"></ol>
-            <button id="btn-fermer-scoreboard" style="background:#66a6ff; color:#fff; border:none; border-radius:6px; padding:10px 24px; font-size:1em; cursor:pointer; transition:background 0.2s;">Fermer</button>
+    <!-- Container pour le scoreboard (mode normal/top) -->
+    <div id="scoreboard-container" style="display:none; position:fixed; top:24px; left:50%; transform:translateX(-50%); z-index:3500; align-items:flex-start; justify-content:center; width:auto; height:auto; background:none; box-shadow:none;">
+        <div id="scoreboard-panel" style="background:#fff; border-radius:18px; box-shadow:0 8px 32px rgba(0,0,0,0.15); padding:40px 36px 36px 36px; text-align:center; max-width:420px; min-width:260px; margin:0; cursor:pointer;">
+            <h2 style="color:#2d3a4b; margin-bottom:18px; font-size:2em;">Meilleurs temps</h2>
+            <ol id="scoreboard-list" style="font-size:1.35em; color:#2980b9; margin-bottom:18px;"></ol>
+            <button id="btn-fermer-scoreboard" style="background:#66a6ff; color:#fff; border:none; border-radius:6px; padding:12px 28px; font-size:1.15em; cursor:pointer; transition:background 0.2s;">Fermer</button>
+        </div>
+    </div>
+    <!-- Scoreboard grand écran -->
+    <div id="scoreboard-fullscreen" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(102,166,255,0.18); z-index:4001; align-items:center; justify-content:center;">
+        <div style="background:#fff; border-radius:24px; box-shadow:0 16px 48px rgba(44,62,80,0.18); padding:64px 48px 48px 48px; text-align:center; max-width:600px; margin:auto; position:relative;">
+            <h2 style="color:#2d3a4b; margin-bottom:28px; font-size:2.5em;">Classement des meilleurs temps</h2>
+            <ol id="scoreboard-list-full" style="font-size:1.7em; color:#2980b9; margin-bottom:28px;"></ol>
+            <button id="btn-fermer-scoreboard-full" style="background:#66a6ff; color:#fff; border:none; border-radius:8px; padding:16px 40px; font-size:1.25em; cursor:pointer; transition:background 0.2s;">Fermer</button>
         </div>
     </div>
     <div style="position:fixed; top:24px; right:24px; z-index:3001; display:flex; gap:8px; align-items:center;">
@@ -161,11 +183,11 @@
             'MEMOIRE', 'DISQUE', 'PIXEL', 'BINAIRE', 'COMPILATEUR', 'ALGORITHME', 'INTERFACE', 
 
             // Cybersécurité
-            'MOT DE PASSE', 'ANTIVIRUS', 'PAREFEU', 'VIRUS', 'MALWARE', 'HAMECONNAGE',
+            'ANTIVIRUS', 'PAREFEU', 'VIRUS', 'MALWARE', 'HAMECONNAGE',
             'CYBERATTAQUE', 'SECURITE', 'PHISHING', 'IDENTITE', 'CONFIDENTIALITE',
             'CRYPTAGE', 'CHIFFREMENT', 'DECHIFFRER', 'PIRATE', 'HACKER', 'CONNEXION', 
             'AUTHENTIFICATION', 'AUTORISATION', 'ALERTE', 'MENACE', 'INTRUSION', 'PROTECTION', 
-            'SAUVEGARDE', 'MISE A JOUR', 'ACCES', 'ESPIONNAGE', 'CYBERCRIMINALITE', 'CYBERSECURITE',
+            'SAUVEGARDE', 'ACCES', 'ESPIONNAGE', 'CYBERCRIMINALITE', 'CYBERSECURITE',
         ];
         // Dictionnaire des définitions pour chaque mot (adapté)
         const definitions = {
@@ -200,7 +222,6 @@
             'ALGORITHME': 'Suite logique d\'étapes pour résoudre un problème.',
             'INTERFACE': 'Moyen d\'interaction entre l\'utilisateur et le programme.',
             // Cybersécurité
-            'MOT DE PASSE': 'Code secret pour accéder à un compte.',
             'ANTIVIRUS': 'Logiciel qui détecte les programmes malveillants.',
             'PAREFEU': 'Filtre les connexions réseau.',
             'VIRUS': 'Programme malveillant qui endommage les systèmes.',
@@ -224,7 +245,6 @@
             'INTRUSION': 'Accès non autorisé à un système informatique.',
             'PROTECTION': 'Mesures pour sécuriser les systèmes contre les menaces.',
             'SAUVEGARDE': 'Copie de données pour prévenir la perte.',
-            'MISE A JOUR': 'Processus de modification d\'un logiciel pour corriger des erreurs ou ajouter des fonctionnalités.',
             'ACCES': 'Permission d\'entrer dans un système ou une ressource.',
             'ESPIONNAGE': 'Surveillance secrète des activités d\'un individu ou d\'une organisation.',
             'CYBERCRIMINALITE': 'Criminalité commise via des systèmes informatiques.',
@@ -254,7 +274,17 @@
         const btnFermerScoreboard = document.getElementById('btn-fermer-scoreboard');
 
         function choisirMot() {
-            motSecret = mots[Math.floor(Math.random() * mots.length)];
+            // Génération aléatoire plus fiable
+            let idx;
+            if (window.crypto && window.crypto.getRandomValues) {
+                // Utilise un Uint32Array pour une meilleure entropie
+                const arr = new Uint32Array(1);
+                window.crypto.getRandomValues(arr);
+                idx = arr[0] % mots.length;
+            } else {
+                idx = Math.floor(Math.random() * mots.length);
+            }
+            motSecret = mots[idx];
             lettresTrouvees = [];
             lettresRatees = [];
         }
@@ -300,7 +330,11 @@
                 afficherMot();
                 if (motSecret.split('').every(l => lettresTrouvees.includes(l))) {
                     afficherMessage('Bravo ! Vous avez gagné !', '#27ae60');
-                    finDePartie();
+                    // Attend que le mot soit affiché avant de montrer le popup
+                    setTimeout(function() {
+                        document.getElementById('popup-victoire').style.display = 'flex';
+                        finDePartie();
+                    }, 150);
                 } else {
                     afficherMessage('Bonne lettre !', '#2980b9');
                 }
@@ -310,14 +344,25 @@
                 if (lettresRatees.length >= maxErreurs) {
                     afficherMot();
                     afficherMessage('Perdu ! Le mot était : ' + motSecret, '#e74c3c');
-                    // Désactive tous les boutons de lettres immédiatement
-                    document.querySelectorAll('.lettre-btn').forEach(btn => btn.disabled = true);
-                    finDePartie();
+                    // Attend que le mot soit affiché avant de montrer le popup
+                    setTimeout(function() {
+                        document.getElementById('popup-defaite').style.display = 'flex';
+                        // Désactive tous les boutons de lettres immédiatement
+                        document.querySelectorAll('.lettre-btn').forEach(btn => btn.disabled = true);
+                        finDePartie();
+                    }, 150);
                     return;
                 } else {
                     afficherMessage('Raté !', '#e67e22');
                 }
             }
+            // Gestion des popups personnalisés
+            document.getElementById('btn-fermer-victoire').onclick = function() {
+                document.getElementById('popup-victoire').style.display = 'none';
+            };
+            document.getElementById('btn-fermer-defaite').onclick = function() {
+                document.getElementById('popup-defaite').style.display = 'none';
+            };
             afficherLettres();
         }
 
@@ -362,16 +407,57 @@
         }
         function showScoreboard() {
             let scores = getScores();
-            // Nettoyage si jamais il y a des entrées invalides
             if (scores.length > 0) {
                 localStorage.setItem('pendu_scores', JSON.stringify(scores));
             }
-            scoreboardList.innerHTML = scores.length ? scores.map((s, i) => `<li><span style='color:#2d3a4b;font-weight:600;'>${s.pseudo}</span> — ${(s.time/1000).toFixed(2)} s</li>`).join('') : '<li>Aucun score</li>';
+            if (scores.length) {
+                // Le premier du classement est toujours en évidence jusqu'à être dépassé
+                const topScore = scores[0];
+                let html = '';
+                html += `<li style="background:linear-gradient(90deg,#66a6ff 0%,#89f7fe 100%);color:#fff;font-weight:700;font-size:1.25em;border-radius:12px;padding:10px 0;margin-bottom:8px;box-shadow:0 2px 8px rgba(102,166,255,0.10);letter-spacing:0.04em;">TOP 1 : <span style='text-shadow:0 2px 8px #2980b9;'>${topScore.pseudo}</span> — <span style='font-weight:800;'>${(topScore.time/1000).toFixed(2)} s</span></li>`;
+                html += scores.slice(1).map(s => `<li><span style='color:#2d3a4b;font-weight:600;'>${s.pseudo}</span> — ${(s.time/1000).toFixed(2)} s</li>`).join('');
+                scoreboardList.innerHTML = html;
+            } else {
+                scoreboardList.innerHTML = '<li>Aucun score</li>';
+            }
+            // Affiche le petit tableau juste en dessous du bouton Scores
             scoreboardContainer.style.display = 'flex';
+            scoreboardContainer.style.position = 'absolute';
+            // Récupère la position du bouton Scores
+            const btnRect = scoreboardBtn.getBoundingClientRect();
+            // Place le tableau juste en dessous du bouton
+            scoreboardContainer.style.top = (window.scrollY + btnRect.bottom + 8) + 'px';
+            // Décale le tableau un peu plus à gauche (ex: -40px)
+            scoreboardContainer.style.left = (window.scrollX + btnRect.left + btnRect.width/2 - 40) + 'px';
+            scoreboardContainer.style.transform = 'translateX(-50%)';
             scoreboardContainer.style.alignItems = 'flex-start';
-            scoreboardContainer.style.justifyContent = 'flex-end';
+            scoreboardContainer.style.justifyContent = 'center';
         }
-        btnFermerScoreboard.onclick = ()=>{scoreboardContainer.style.display='none';};
+        // Affichage grand écran au clic sur le panel
+        document.getElementById('scoreboard-panel').onclick = function(e) {
+            // Empêche le bouton fermer d'ouvrir le fullscreen
+            if (e.target && e.target.id === 'btn-fermer-scoreboard') return;
+            let scores = getScores();
+            if (scores.length) {
+                // TOP 1 en évidence
+                const topScore = scores[0];
+                let html = '';
+                html += `<li style="background:linear-gradient(90deg,#66a6ff 0%,#89f7fe 100%);color:#fff;font-weight:700;font-size:1.35em;border-radius:14px;padding:14px 0;margin-bottom:12px;box-shadow:0 2px 12px rgba(102,166,255,0.13);letter-spacing:0.05em;">TOP 1 : <span style='text-shadow:0 2px 8px #2980b9;'>${topScore.pseudo}</span> — <span style='font-weight:800;'>${(topScore.time/1000).toFixed(2)} s</span></li>`;
+                html += scores.slice(1).map((s, i) => `<li style='margin-bottom:12px;'><span style='color:#2d3a4b;font-weight:700;'>${i+2}. ${s.pseudo}</span> — <span style='color:#2980b9;'>${(s.time/1000).toFixed(2)} s</span></li>`).join('');
+                document.getElementById('scoreboard-list-full').innerHTML = html;
+            } else {
+                document.getElementById('scoreboard-list-full').innerHTML = '<li>Aucun score</li>';
+            }
+            // Affiche le grand tableau au centre et masque le petit tableau
+            document.getElementById('scoreboard-fullscreen').style.display = 'flex';
+            scoreboardContainer.style.display = 'none';
+        };
+        document.getElementById('btn-fermer-scoreboard').onclick = function() {
+            scoreboardContainer.style.display = 'none';
+        };
+        document.getElementById('btn-fermer-scoreboard-full').onclick = function() {
+            document.getElementById('scoreboard-fullscreen').style.display = 'none';
+        };
 
         function finDePartie() {
             document.querySelectorAll('.lettre-btn').forEach(btn => btn.disabled = true);
@@ -388,11 +474,14 @@
             motFinalTexte.textContent = motSecret;
             motFinalDef.textContent = definitions[motSecret] || '';
             motFinalDiv.style.display = 'flex';
-            setTimeout(() => {
+            // Ajoute un gestionnaire d'événement pour masquer l'écran mot final au clic
+            function handleMotFinalClick() {
                 motFinalDiv.style.display = 'none';
-                // Affiche la boîte de dialogue pour rejouer
                 document.getElementById('dialog-rejouer').style.display = 'flex';
-            }, 6000);
+                // Nettoie le gestionnaire pour éviter les doublons
+                motFinalDiv.removeEventListener('click', handleMotFinalClick);
+            }
+            motFinalDiv.addEventListener('click', handleMotFinalClick);
         }
 
         // Gestion des boutons de la boîte de dialogue
