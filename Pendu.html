@@ -1,1 +1,768 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu du Pendu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            /* Fond bleu clair avec câbles animés en fond */
+            background: linear-gradient(120deg, #89f7fe 0%, #66a6ff 100%);
+            font-family: 'Montserrat', Arial, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .container, .entry-container {
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            padding: 40px 32px 32px 32px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        h1 {
+            color: #2d3a4b;
+            margin-bottom: 16px;
+            font-size: 2.2em;
+        }
+        #pendu-drawing {
+            margin: 24px auto 16px auto;
+            width: 180px;
+            height: 180px;
+            background: none;
+        }
+        #mot {
+            font-size: 2em;
+            letter-spacing: 0.3em;
+            margin: 18px 0 24px 0;
+            color: #2d3a4b;
+        }
+        #lettres {
+            margin: 18px 0 0 0;
+        }
+        .lettre-btn {
+            background: #e3e9f7;
+            border: none;
+            border-radius: 6px;
+            margin: 4px;
+            padding: 10px 14px;
+            font-size: 1em;
+            color: #2d3a4b;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+        .lettre-btn:disabled {
+            background: #bfc9d9;
+            color: #fff;
+            cursor: not-allowed;
+        }
+        #message {
+            margin: 18px 0 0 0;
+            font-size: 1.1em;
+            color: #e74c3c;
+            min-height: 24px;
+        }
+        #restart {
+            margin-top: 24px;
+            background: #66a6ff;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 24px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        #restart:hover, #play-btn:hover {
+            background: #4e8edb;
+        }
+        /* Styles pour la page d'entrée */
+        .entry-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+        }
+        #play-btn {
+            margin-top: 32px;
+            background: #66a6ff;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 32px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        /* Styles pour la boîte de dialogue */
+        #dialog-rejouer {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.25);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        #dialog-rejouer > div {
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 16px 48px rgba(44,62,80,0.25), 0 2px 12px rgba(102,166,255,0.12);
+            padding: 40px 32px;
+            text-align: center;
+            max-width: 320px;
+            margin: auto;
+        }
+        #dialog-rejouer h2 {
+            color: #2d3a4b;
+            margin-bottom: 24px;
+        }
+        #dialog-rejouer button {
+            margin: 12px 16px 0 16px;
+            padding: 12px 32px;
+            font-size: 1.1em;
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+            border: none;
+            border-radius: 30px;
+            box-shadow: 0 2px 8px rgba(102,166,255,0.10);
+            outline: none;
+        }
+        #btn-oui {
+            background: linear-gradient(90deg, #66a6ff 0%, #89f7fe 100%);
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(102,166,255,0.18);
+        }
+        #btn-oui:hover {
+            background: linear-gradient(90deg, #4e8edb 0%, #66a6ff 100%);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 24px rgba(102,166,255,0.22);
+        }
+        #btn-non {
+            background: linear-gradient(90deg, #e74c3c 0%, #ff7675 100%);
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(231,76,60,0.13);
+        }
+        #btn-non:hover {
+            background: linear-gradient(90deg, #c0392b 0%, #e74c3c 100%);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 24px rgba(231,76,60,0.18);
+        }
+        /* Écran de transition */
+        #mot-final {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(102,166,255,0.90);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        #mot-final-label {
+            font-size: 2em;
+            color: #fff;
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-weight: 500;
+            margin-bottom: 18px;
+            letter-spacing: 0.04em;
+        }
+        #mot-final-texte {
+            font-size: 3.5em;
+            color: #fff;
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-shadow: 0 4px 24px rgba(44,62,80,0.25);
+            background: rgba(44,62,80,0.10);
+            border-radius: 24px;
+            padding: 32px 48px;
+            display: inline-block;
+        }
+        #mot-final-definition {
+            margin-top: 32px;
+            font-size: 1.3em;
+            color: #fff;
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-weight: 400;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        /* Styles pour la page Réalisateur */
+        #page-realisateur {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            /* Fond transparent + léger dégradé pour lisibilité, laisse voir l'animation SVG */
+            background: linear-gradient(120deg, rgba(143,207,255,0.80) 0%, rgba(102,166,255,0.70) 100%);
+            z-index: 3000;
+            align-items: center;
+            justify-content: center;
+        }
+        #page-realisateur > div {
+            background: #fff;
+            border-radius: 24px;
+            box-shadow: 0 12px 40px rgba(44,62,80,0.18);
+            padding: 48px 36px 36px 36px;
+            text-align: center;
+            max-width: 440px;
+            margin: auto;
+            position: relative;
+        }
+        #page-realisateur h2 {
+            color: #2d3a4b;
+            margin-bottom: 18px;
+            margin-top: 48px;
+            font-size: 2em;
+            letter-spacing: 0.04em;
+        }
+        #page-realisateur p {
+            font-size: 1.18em;
+            color: #2d3a4b;
+            margin-bottom: 32px;
+        }
+        #page-realisateur ul {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 28px 0;
+        }
+        #page-realisateur ul li {
+            font-size: 1.13em;
+            color: #2980b9;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        #page-realisateur div.info {
+            font-size: 1.08em;
+            color: #2d3a4b;
+            margin-bottom: 18px;
+        }
+        #page-realisateur div.annee {
+            font-size: 0.98em;
+            color: #bfc9d9;
+            margin-bottom: 8px;
+        }
+        #btn-retour-accueil {
+            margin-top: 18px;
+            background: linear-gradient(90deg, #66a6ff 0%, #89f7fe 100%);
+            color: #fff;
+            border: none;
+            border-radius: 30px;
+            padding: 12px 32px;
+            font-size: 1.08em;
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(102,166,255,0.10);
+        }
+
+        /* Styles pour l'animation circuit imprimé sur tout l'écran */
+        #cables-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            min-width: 100vw;
+            min-height: 100vh;
+            max-width: 100vw;
+            max-height: 100vh;
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(1.2px) opacity(0.7);
+        }
+        #cables-bg path {
+            animation: cableAnim 6s linear infinite;
+        }
+        @keyframes cableAnim {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-100%); }
+        }
+    </style>
+</head>
+<body>
+    <svg id="cables-bg" width="100vw" height="100vh" viewBox="0 0 1920 1080" preserveAspectRatio="none" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;pointer-events:none;filter:blur(2.5px) opacity(0.7);">
+        <defs>
+            <linearGradient id="circuitGrad1" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#66a6ff"/>
+                <stop offset="100%" stop-color="#00fff7"/>
+            </linearGradient>
+            <linearGradient id="circuitGrad2" x1="1" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#00b894"/>
+                <stop offset="100%" stop-color="#66a6ff"/>
+            </linearGradient>
+            <filter id="circuitGlow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="2" result="blur"/>
+                <feMerge>
+                    <feMergeNode in="blur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+            </filter>
+        </defs>
+        <!-- Traces principales du circuit (prolongées et espacées) -->
+        <polyline points="0,120 300,120 400,320 700,320 700,520 1100,520 1100,820 1500,820 1500,1020 1920,970" stroke="url(#circuitGrad1)" stroke-width="8" fill="none" filter="url(#circuitGlow)">
+            <animate attributeName="stroke" values="url(#circuitGrad1);#00fff7;url(#circuitGrad1)" dur="8s" repeatCount="indefinite"/>
+        </polyline>
+        <polyline points="0,400 500,400 900,600 1300,600 1300,800 1920,820" stroke="url(#circuitGrad2)" stroke-width="6" fill="none" filter="url(#circuitGlow)">
+            <animate attributeName="stroke" values="url(#circuitGrad2);#66a6ff;url(#circuitGrad2)" dur="10s" repeatCount="indefinite"/>
+        </polyline>
+        <polyline points="0,900 500,900 500,700 1000,700 1000,400 1600,400 1600,200 1920,220" stroke="#00fff7" stroke-width="5" fill="none" filter="url(#circuitGlow)">
+            <animate attributeName="stroke" values="#00fff7;#66a6ff;#00fff7" dur="12s" repeatCount="indefinite"/>
+        </polyline>
+        <polyline points="1920,200 1700,500 1300,500 1300,900 700,900 700,1080 0,1080" stroke="#66a6ff" stroke-width="4" fill="none" filter="url(#circuitGlow)">
+            <animate attributeName="stroke" values="#66a6ff;#00fff7;#66a6ff" dur="14s" repeatCount="indefinite"/>
+        </polyline>
+        <!-- Branches secondaires espacées -->
+        <polyline points="400,0 400,200 600,400" stroke="#b2bec3" stroke-width="3" fill="none" opacity="0.7"/>
+        <polyline points="1520,0 1520,400 1700,400" stroke="#b2bec3" stroke-width="3" fill="none" opacity="0.7"/>
+        <polyline points="0,700 400,700 600,900" stroke="#b2bec3" stroke-width="3" fill="none" opacity="0.7"/>
+        <polyline points="1920,900 1700,900 1500,1080" stroke="#b2bec3" stroke-width="3" fill="none" opacity="0.7"/>
+        <!-- Puces électroniques (plus nombreuses) -->
+        <rect x="290" y="390" width="20" height="20" fill="#222f3e" stroke="#00fff7" stroke-width="2" rx="4"/>
+        <rect x="890" y="790" width="24" height="24" fill="#222f3e" stroke="#66a6ff" stroke-width="2" rx="5"/>
+        <rect x="1490" y="690" width="18" height="18" fill="#222f3e" stroke="#00b894" stroke-width="2" rx="3"/>
+        <rect x="1190" y="390" width="18" height="18" fill="#222f3e" stroke="#00fff7" stroke-width="2" rx="3"/>
+        <rect x="400" y="890" width="16" height="16" fill="#222f3e" stroke="#66a6ff" stroke-width="2" rx="3"/>
+        <!-- Points de connexion (plus nombreux, certains clignotent) -->
+        <circle cx="300" cy="200" r="7" fill="#00fff7" filter="url(#circuitGlow)">
+            <animate attributeName="opacity" values="1;0.3;1" dur="2.5s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="600" cy="400" r="7" fill="#66a6ff" filter="url(#circuitGlow)">
+            <animate attributeName="opacity" values="1;0.3;1" dur="3.2s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="900" cy="600" r="7" fill="#00fff7" filter="url(#circuitGlow)">
+            <animate attributeName="opacity" values="1;0.3;1" dur="2.1s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="1200" cy="800" r="7" fill="#66a6ff" filter="url(#circuitGlow)">
+            <animate attributeName="opacity" values="1;0.3;1" dur="2.8s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="1500" cy="700" r="7" fill="#00b894" filter="url(#circuitGlow)">
+            <animate attributeName="opacity" values="1;0.3;1" dur="2.3s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="400" cy="900" r="7" fill="#66a6ff" filter="url(#circuitGlow)">
+            <animate attributeName="opacity" values="1;0.3;1" dur="2.7s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="1190" cy="390" r="7" fill="#00fff7" filter="url(#circuitGlow)">
+            <animate attributeName="opacity" values="1;0.3;1" dur="2.9s" repeatCount="indefinite"/>
+        </circle>
+        <!-- Signaux lumineux animés (plusieurs sur différents chemins) -->
+        <circle r="10" fill="#00fff7">
+            <animateMotion dur="8s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" path="M100,200 300,200 300,400 600,400 600,600 900,600 900,800 1200,800 1200,1000 1800,1000"/>
+        </circle>
+        <circle r="7" fill="#66a6ff">
+            <animateMotion dur="10s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" path="M400,100 400,300 700,300 700,500 1000,500 1000,700 1500,700"/>
+        </circle>
+        <circle r="6" fill="#00fff7">
+            <animateMotion dur="12s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" path="M200,900 400,900 400,700 800,700 800,400 1200,400 1200,200 1700,200"/>
+        </circle>
+        <circle r="5" fill="#66a6ff">
+            <animateMotion dur="14s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" path="M1720,100 1720,400 1500,400 1500,800 1100,800 1100,1000 300,1000"/>
+        </circle>
+    </svg>
+    <div class="entry-container" id="entry-container">
+        <h1>Bienvenue sur notre jeu du pendu!</h1>
+        <p style="font-size:1.15em;color:#2d3a4b;">Prêt à tester vos connaissances dans le domaine de l'informatique et de la cybersécurité ?</p>
+        <input id="pseudo-input" type="text" maxlength="16" placeholder="Votre pseudo" style="margin-top:22px; font-size:1.08em; padding:10px 18px; border-radius:8px; border:1.5px solid #66a6ff; outline:none; font-family:'Montserrat',Arial,sans-serif; color:#2980b9; background:#f7fbff; width:80%; max-width:220px; box-sizing:border-box; text-align:center;">
+        <button id="play-btn" disabled>Jouer</button>
+        <button id="btn-realisateur" style="margin-top:18px; background:#e3e9f7; color:#2d3a4b; border:none; border-radius:6px; padding:10px 24px; font-size:1em; cursor:pointer; transition:background 0.2s;">Réalisateur</button>
+    </div>
+    <div class="container" id="game-container" style="display:none;">
+        <h1>Jeu du Pendu</h1>
+        <svg id="pendu-drawing" viewBox="0 0 180 180"></svg>
+        <div id="mot">_ _ _ _ _</div>
+        <div id="lettres"></div>
+        <div id="message"></div>
+        <button id="restart" style="display:none;">Rejouer</button>
+        <button id="btn-retour-jeu" style="position:absolute; top:18px; left:18px; z-index:3; background:#fff; color:#2980b9; border:2px solid #66a6ff; border-radius:8px; padding:8px 18px; font-size:1em; font-family:'Montserrat',Arial,sans-serif; font-weight:600; box-shadow:0 2px 8px rgba(102,166,255,0.10); cursor:pointer;">Retour</button>
+    </div>
+    <!-- Boîte de dialogue pour rejouer -->
+    <div id="dialog-rejouer" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.25); z-index:1000; align-items:center; justify-content:center;">
+        <div style="background:#fff; border-radius:18px; box-shadow:0 16px 48px rgba(44,62,80,0.25), 0 2px 12px rgba(102,166,255,0.12); padding:40px 32px; text-align:center; max-width:320px; margin:auto;">
+            <h2 style="color:#2d3a4b; margin-bottom:24px;">Voulez-vous rejouer ?</h2>
+            <button id="btn-oui" style="margin:12px 16px 0 16px; background:#66a6ff; color:#fff; border:none; border-radius:6px; padding:10px 24px; font-size:1em; cursor:pointer; transition:background 0.2s;">Oui</button>
+            <button id="btn-non" style="margin:12px 16px 0 16px; background:#e74c3c; color:#fff; border:none; border-radius:6px; padding:10px 24px; font-size:1em; cursor:pointer; transition:background 0.2s;">Non</button>
+        </div>
+    </div>
+    <!-- Écran de transition pour afficher le mot en grand -->
+    <div id="mot-final" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(102,166,255,0.90); z-index:2000; align-items:center; justify-content:center;">
+        <div style="width:100vw; text-align:center;">
+            <div id="mot-final-label" style="font-size:2em; color:#fff; font-family:'Montserrat',Arial,sans-serif; font-weight:500; margin-bottom:18px; letter-spacing:0.04em;">Le mot était :</div>
+            <span id="mot-final-texte" style="font-size:3.5em; color:#fff; font-family:'Montserrat',Arial,sans-serif; font-weight:700; letter-spacing:0.15em; text-shadow:0 4px 24px rgba(44,62,80,0.25); background:rgba(44,62,80,0.10); border-radius:24px; padding:32px 48px; display:inline-block;"></span>
+            <div id="mot-final-definition" style="margin-top:32px; font-size:1.3em; color:#fff; font-family:'Montserrat',Arial,sans-serif; font-weight:400; max-width:600px; margin-left:auto; margin-right:auto;"></div>
+        </div>
+    </div>
+    <!-- Page Réalisateur (masquée par défaut) -->
+    <div id="page-realisateur" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:linear-gradient(120deg, #89f7fe 0%, #66a6ff 100%); z-index:3000; align-items:center; justify-content:center;">
+        <div style="background:#fff; border-radius:24px; box-shadow:0 12px 40px rgba(44,62,80,0.18); padding:48px 36px 36px 36px; text-align:center; max-width:440px; margin:auto; position:relative;">
+            <div style="position:absolute; top:-36px; left:50%; transform:translateX(-50%); background:#66a6ff; width:72px; height:72px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 16px rgba(102,166,255,0.18);">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#fff"/></svg>
+            </div>
+            <h2 style="color:#2d3a4b; margin-bottom:18px; margin-top:48px; font-size:2em; letter-spacing:0.04em;">Réalisation</h2>
+            <p style="font-size:1.18em; color:#2d3a4b; margin-bottom:32px;">Jeu du pendu numérique réalisé par :</p>
+            <ul style="list-style:none; padding:0; margin:0 0 28px 0;">
+                <li style="font-size:1.13em; color:#2980b9; font-weight:600; margin-bottom:10px;">Louis LOGEZ</li>
+                <li style="font-size:1.13em; color:#2980b9; font-weight:600; margin-bottom:10px;">Joey DILLENSEGER</li>
+                <li style="font-size:1.13em; color:#2980b9; font-weight:600; margin-bottom:10px;">Pierre-Olivier LECOCQ</li>
+                <li style="font-size:1.13em; color:#2980b9; font-weight:600; margin-bottom:10px;">Fabrice GOVAN</li>
+                <li style="font-size:1.13em; color:#2980b9; font-weight:600;">Mickaël SEO</li>
+            </ul>
+            <div style="font-size:1.08em; color:#2d3a4b; margin-bottom:18px;">Étudiants en première année de <span style="color:#66a6ff; font-weight:600;">BTS SIO option SISR et SLAM</span></div>
+            <div style="font-size:0.98em; color:#bfc9d9; margin-bottom:8px;">Année 2025</div>
+            <button id="btn-retour-accueil" style="margin-top:18px; background:linear-gradient(90deg, #66a6ff 0%, #89f7fe 100%); color:#fff; border:none; border-radius:30px; padding:12px 32px; font-size:1.08em; font-family:'Montserrat',Arial,sans-serif; font-weight:600; letter-spacing:0.05em; cursor:pointer; transition:background 0.2s, transform 0.15s, box-shadow 0.2s; box-shadow:0 2px 8px rgba(102,166,255,0.10);">Retour</button>
+        </div>
+    </div>
+    <!-- Container pour le scoreboard -->
+    <div id="scoreboard-container" style="display:none; position:fixed; top:68px; right:24px; z-index:3500; align-items:flex-start; justify-content:flex-end; width:auto; height:auto; background:none; box-shadow:none;">
+        <div style="background:#fff; border-radius:18px; box-shadow:0 8px 32px rgba(0,0,0,0.15); padding:32px 28px 28px 28px; text-align:center; max-width:340px; min-width:220px; margin:0;">
+            <h2 style="color:#2d3a4b; margin-bottom:18px;">Meilleurs temps</h2>
+            <ol id="scoreboard-list" style="font-size:1.15em; color:#2980b9; margin-bottom:18px;"></ol>
+            <button id="btn-fermer-scoreboard" style="background:#66a6ff; color:#fff; border:none; border-radius:6px; padding:10px 24px; font-size:1em; cursor:pointer; transition:background 0.2s;">Fermer</button>
+        </div>
+    </div>
+    <div style="position:fixed; top:24px; right:24px; z-index:3001; display:flex; gap:8px; align-items:center;">
+        <button id="btn-scoreboard" style="background:#fff; color:#2980b9; border:2px solid #66a6ff; border-radius:8px; padding:8px 18px; font-size:1em; font-family:'Montserrat',Arial,sans-serif; font-weight:600; box-shadow:0 2px 8px rgba(102,166,255,0.10); cursor:pointer;">Scores</button>
+        <button id="btn-reset-scoreboard" title="Réinitialiser le classement" style="background:#e5e7eb; color:#374151; border:none; border-radius:8px; padding:7px 14px; font-size:1.1em; font-family:'Montserrat',Arial,sans-serif; font-weight:500; box-shadow:none; cursor:pointer; opacity:0.7; transition:opacity 0.2s;">&#x21bb;</button>
+    </div>
+    <div id="chrono" style="position:absolute; top:18px; left:18px; font-size:1.1em; color:#66a6ff; font-family:'Montserrat',Arial,sans-serif; font-weight:600; background:rgba(255,255,255,0.85); border-radius:8px; padding:6px 16px; z-index:2; display:none;"></div>
+    <script>
+        // Liste de mots pour le jeu (moitié informatique, moitié cybersécurité, max 12 lettres)
+        const mots = [
+            // Informatique
+            'ORDINATEUR', 'CLAVIER', 'ECRAN', 'SOURIS', 'LOGICIEL', 'PROGRAMME', 'CODE',
+            'VARIABLE', 'BOUCLE', 'FONCTION', 'BUG', 'FICHIER', 'DOSSIER', 'BASE', 'DONNEES', 
+            'RESEAU', 'INTERNET', 'NAVIGATEUR', 'SITE', 'PAGE', 'LIEN', 'SERVEUR', 'CLIENT', 
+            'MEMOIRE', 'DISQUE', 'PIXEL', 'BINAIRE', 'COMPILATEUR', 'ALGORITHME', 'INTERFACE', 
+
+            // Cybersécurité
+            'MOT DE PASSE', 'ANTIVIRUS', 'PAREFEU', 'VIRUS', 'MALWARE', 'HAMECONNAGE',
+            'CYBERATTAQUE', 'SECURITE', 'PHISHING', 'IDENTITE', 'CONFIDENTIALITE',
+            'CRYPTAGE', 'CHIFFREMENT', 'DECHIFFRER', 'PIRATE', 'HACKER', 'CONNEXION', 
+            'AUTHENTIFICATION', 'AUTORISATION', 'ALERTE', 'MENACE', 'INTRUSION', 'PROTECTION', 
+            'SAUVEGARDE', 'MISE A JOUR', 'ACCES', 'ESPIONNAGE', 'CYBERCRIMINALITE', 'CYBERSECURITE',
+        ];
+        // Dictionnaire des définitions pour chaque mot (adapté)
+        const definitions = {
+            'ORDINATEUR': 'Machine capable d\'exécuter des programmes.',
+            'CLAVIER': 'Périphérique pour taper du texte.',
+            'ECRAN': '	Affiche les informations visuelles.',
+            'SOURIS': 'Dispositif pour déplacer un curseur.',
+            'LOGICIEL': 'Programme informatique.',
+            'PROGRAMME': 'Suite d\'instructions exécutées par un ordinateur.',
+            'CODE': 'Ensemble d\'instructions écrites en langage informatique.',
+            'VARIABLE': 'Élément qui stocke une valeur dans un programme.',
+            'BOUCLE': 'Instruction qui répète une action plusieurs fois.',
+            'FONCTION': 'Bloc de code réutilisable.',
+            'BUG': 'Erreur dans un programme informatique.',
+            'FICHIER': 'Ensemble de données sauvegardées.',
+            'DOSSIER': 'Conteneur de fichiers.',
+            'BASE': 'Structure de données organisée.',
+            'DONNEES': 'Informations traitées par un ordinateur.',
+            'RESEAU': '	Ensemble d\'ordinateurs connectés entre eux.',
+            'INTERNET': 'Réseau mondial d\'échange d\'informations.',
+            'NAVIGATEUR': '	Logiciel pour accéder au Web.',
+            'SITE': 'Ensemble de pages web.',
+            'PAGE': 'Document web affiché dans un navigateur.',
+            'LIEN': 'Élément qui permet d\'accéder à une autre page web.',
+            'SERVEUR': 'Ordinateur qui fournit des services à d\'autres.',
+            'CLIENT': 'Ordinateur ou logiciel qui demande un service.',
+            'MEMOIRE': 'Espace où sont stockées les données.',
+            'DISQUE': 'Support de stockage de données.',
+            'PIXEL': 'Plus petit point d\'une image numérique.',
+            'BINAIRE': 'Système de numération utilisant deux symboles (0 et 1).',
+            'COMPILATEUR': 'Programme qui traduit le code source en code exécutable.',
+            'ALGORITHME': 'Suite logique d\'étapes pour résoudre un problème.',
+            'INTERFACE': 'Moyen d\'interaction entre l\'utilisateur et le programme.',
+            // Cybersécurité
+            'MOT DE PASSE': 'Code secret pour accéder à un compte.',
+            'ANTIVIRUS': 'Logiciel qui détecte les programmes malveillants.',
+            'PAREFEU': 'Filtre les connexions réseau.',
+            'VIRUS': 'Programme malveillant qui endommage les systèmes.',
+            'MALWARE': 'Logiciel malveillant conçu pour nuire.',
+            'HAMECONNAGE': 'Tentative de vol d\'informations par message trompeur.',
+            'CYBERATTAQUE': 'Tentative d\'endommager ou de perturber un système informatique.',
+            'SECURITE': 'Mesures pour protéger les systèmes informatiques.',
+            'PHISHING': 'Technique de fraude en ligne pour voler des informations.',
+            'IDENTITE': 'Ensemble des informations personnelles d\'un individu.',
+            'CONFIDENTIALITE': 'Protection des informations sensibles.',
+            'CRYPTAGE': 'Processus de transformation des données pour les rendre illisibles.',
+            'CHIFFREMENT': 'Méthode de sécurisation des données par transformation.',
+            'DECHIFFRER': 'Processus de transformation des données chiffrées en données lisibles.',
+            'PIRATE': 'Personne qui accède illégalement à des systèmes informatiques.',
+            'HACKER': 'Personne qui utilise ses compétences informatiques pour explorer ou exploiter des systèmes.',
+            'CONNEXION': 'Accès à un réseau ou service.',
+            'AUTHENTIFICATION': 'Processus de vérification de l\'identité d\'un utilisateur.',
+            'AUTORISATION': 'Processus de validation des droits d\'accès d\'un utilisateur.',
+            'ALERTE': 'Signal d\'un danger ou incident informatique.',
+            'MENACE': 'Potentiel danger pour la sécurité des systèmes.',
+            'INTRUSION': 'Accès non autorisé à un système informatique.',
+            'PROTECTION': 'Mesures pour sécuriser les systèmes contre les menaces.',
+            'SAUVEGARDE': 'Copie de données pour prévenir la perte.',
+            'MISE A JOUR': 'Processus de modification d\'un logiciel pour corriger des erreurs ou ajouter des fonctionnalités.',
+            'ACCES': 'Permission d\'entrer dans un système ou une ressource.',
+            'ESPIONNAGE': 'Surveillance secrète des activités d\'un individu ou d\'une organisation.',
+            'CYBERCRIMINALITE': 'Criminalité commise via des systèmes informatiques.',
+            'CYBERSECURITE': 'Discipline visant à protéger les systèmes informatiques contre les menaces et les attaques.'
+        };
+        let motSecret = '';
+        let lettresTrouvees = [];
+        let lettresRatees = [];
+        let maxErreurs = 7;
+        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+        const motDiv = document.getElementById('mot');
+        const lettresDiv = document.getElementById('lettres');
+        const messageDiv = document.getElementById('message');
+        const penduDrawing = document.getElementById('pendu-drawing');
+        const restartBtn = document.getElementById('restart');
+        const entryContainer = document.getElementById('entry-container');
+        const gameContainer = document.getElementById('game-container');
+        const playBtn = document.getElementById('play-btn');
+
+        let chronoInterval = null;
+        let chronoStart = null;
+        const chronoDiv = document.getElementById('chrono');
+        const scoreboardBtn = document.getElementById('btn-scoreboard');
+        const scoreboardContainer = document.getElementById('scoreboard-container');
+        const scoreboardList = document.getElementById('scoreboard-list');
+        const btnFermerScoreboard = document.getElementById('btn-fermer-scoreboard');
+
+        function choisirMot() {
+            motSecret = mots[Math.floor(Math.random() * mots.length)];
+            lettresTrouvees = [];
+            lettresRatees = [];
+        }
+
+        function afficherMot() {
+            motDiv.textContent = motSecret.split('').map(l => lettresTrouvees.includes(l) ? l : '_').join(' ');
+        }
+
+        function afficherLettres() {
+            lettresDiv.innerHTML = '';
+            alphabet.forEach(l => {
+                const btn = document.createElement('button');
+                btn.textContent = l;
+                btn.className = 'lettre-btn';
+                btn.disabled = lettresTrouvees.includes(l) || lettresRatees.includes(l) || motSecret.length === 0;
+                btn.onclick = () => jouerLettre(l);
+                lettresDiv.appendChild(btn);
+            });
+        }
+
+        function afficherMessage(msg, color = '#e74c3c') {
+            messageDiv.textContent = msg;
+            messageDiv.style.color = color;
+        }
+
+        function dessinerPendu(erreurs) {
+            penduDrawing.innerHTML = '';
+            if (erreurs > 0) penduDrawing.innerHTML += '<line x1="20" y1="170" x2="160" y2="170" stroke="#2d3a4b" stroke-width="6" />';
+            if (erreurs > 1) penduDrawing.innerHTML += '<line x1="60" y1="170" x2="60" y2="30" stroke="#2d3a4b" stroke-width="6" />';
+            if (erreurs > 2) penduDrawing.innerHTML += '<line x1="60" y1="30" x2="120" y2="30" stroke="#2d3a4b" stroke-width="6" />';
+            if (erreurs > 3) penduDrawing.innerHTML += '<line x1="120" y1="30" x2="120" y2="50" stroke="#2d3a4b" stroke-width="4" />';
+            if (erreurs > 4) penduDrawing.innerHTML += '<circle cx="120" cy="65" r="15" stroke="#2d3a4b" stroke-width="4" fill="none" />';
+            if (erreurs > 5) penduDrawing.innerHTML += '<line x1="120" y1="80" x2="120" y2="120" stroke="#2d3a4b" stroke-width="4" />';
+            if (erreurs > 6) {
+                penduDrawing.innerHTML += '<line x1="120" y1="120" x2="105" y2="150" stroke="#2d3a4b" stroke-width="4" />';
+                penduDrawing.innerHTML += '<line x1="120" y1="120" x2="135" y2="150" stroke="#2d3a4b" stroke-width="4" />';
+            }
+        }
+
+        function jouerLettre(lettre) {
+            if (motSecret.includes(lettre)) {
+                lettresTrouvees.push(lettre);
+                afficherMot();
+                if (motSecret.split('').every(l => lettresTrouvees.includes(l))) {
+                    afficherMessage('Bravo ! Vous avez gagné !', '#27ae60');
+                    finDePartie();
+                } else {
+                    afficherMessage('Bonne lettre !', '#2980b9');
+                }
+            } else {
+                lettresRatees.push(lettre);
+                dessinerPendu(lettresRatees.length);
+                if (lettresRatees.length >= maxErreurs) {
+                    afficherMot();
+                    afficherMessage('Perdu ! Le mot était : ' + motSecret, '#e74c3c');
+                    // Désactive tous les boutons de lettres immédiatement
+                    document.querySelectorAll('.lettre-btn').forEach(btn => btn.disabled = true);
+                    finDePartie();
+                    return;
+                } else {
+                    afficherMessage('Raté !', '#e67e22');
+                }
+            }
+            afficherLettres();
+        }
+
+        function startChrono() {
+            chronoStart = Date.now();
+            chronoDiv.style.display = 'block';
+            updateChrono();
+            chronoInterval = setInterval(updateChrono, 100);
+        }
+
+        function stopChrono() {
+            if (chronoInterval) clearInterval(chronoInterval);
+            chronoInterval = null;
+        }
+
+        function updateChrono() {
+            if (!chronoStart) return;
+            const ms = Date.now() - chronoStart;
+            chronoDiv.textContent = '⏱ ' + (ms/1000).toFixed(2) + ' s';
+        }
+
+        function resetChrono() {
+            stopChrono();
+            chronoDiv.style.display = 'block'; // Affiche le chrono même à la fin
+            chronoDiv.textContent = '⏱ 0.00 s'; // Affiche 0.00 s
+            chronoStart = null;
+        }
+
+        // Scoreboard (localStorage)
+        function getScores() {
+            // On filtre pour ne garder que les scores valides (pseudo non vide, temps numérique)
+            let scores = JSON.parse(localStorage.getItem('pendu_scores') || '[]');
+            return Array.isArray(scores) ? scores.filter(s => s && typeof s.pseudo === 'string' && s.pseudo && typeof s.time === 'number' && !isNaN(s.time)) : [];
+        }
+        function saveScore(timeMs) {
+            const pseudo = localStorage.getItem('pendu_pseudo') || 'Anonyme';
+            if (!pseudo || typeof timeMs !== 'number' || isNaN(timeMs) || timeMs <= 0) return;
+            let scores = getScores();
+            scores.push({ pseudo, time: timeMs });
+            scores = scores.sort((a, b) => a.time - b.time).slice(0, 5);
+            localStorage.setItem('pendu_scores', JSON.stringify(scores));
+        }
+        function showScoreboard() {
+            let scores = getScores();
+            // Nettoyage si jamais il y a des entrées invalides
+            if (scores.length > 0) {
+                localStorage.setItem('pendu_scores', JSON.stringify(scores));
+            }
+            scoreboardList.innerHTML = scores.length ? scores.map((s, i) => `<li><span style='color:#2d3a4b;font-weight:600;'>${s.pseudo}</span> — ${(s.time/1000).toFixed(2)} s</li>`).join('') : '<li>Aucun score</li>';
+            scoreboardContainer.style.display = 'flex';
+            scoreboardContainer.style.alignItems = 'flex-start';
+            scoreboardContainer.style.justifyContent = 'flex-end';
+        }
+        btnFermerScoreboard.onclick = ()=>{scoreboardContainer.style.display='none';};
+
+        function finDePartie() {
+            document.querySelectorAll('.lettre-btn').forEach(btn => btn.disabled = true);
+            stopChrono();
+            // Si victoire, sauvegarde le temps AVANT de resetChrono (pour garder chronoStart)
+            if (motSecret.split('').every(l => lettresTrouvees.includes(l))) {
+                if (chronoStart) saveScore(Date.now() - chronoStart);
+            }
+            resetChrono(); // Réinitialise et affiche 0.00 s
+            // Affiche le mot en grand au centre de l'écran avec le label et la définition
+            const motFinalDiv = document.getElementById('mot-final');
+            const motFinalTexte = document.getElementById('mot-final-texte');
+            const motFinalDef = document.getElementById('mot-final-definition');
+            motFinalTexte.textContent = motSecret;
+            motFinalDef.textContent = definitions[motSecret] || '';
+            motFinalDiv.style.display = 'flex';
+            setTimeout(() => {
+                motFinalDiv.style.display = 'none';
+                // Affiche la boîte de dialogue pour rejouer
+                document.getElementById('dialog-rejouer').style.display = 'flex';
+            }, 6000);
+        }
+
+        // Gestion des boutons de la boîte de dialogue
+        document.getElementById('btn-oui').onclick = function() {
+            document.getElementById('dialog-rejouer').style.display = 'none';
+            nouvellePartie();
+        };
+        document.getElementById('btn-non').onclick = function() {
+            document.getElementById('dialog-rejouer').style.display = 'none';
+            gameContainer.style.display = 'none';
+            entryContainer.style.display = 'flex';
+        };
+
+        function nouvellePartie() {
+            choisirMot();
+            afficherMot();
+            afficherLettres();
+            dessinerPendu(lettresRatees.length);
+            afficherMessage('');
+            resetChrono();
+            startChrono();
+            document.getElementById('dialog-rejouer').style.display = 'none';
+        }
+
+        restartBtn.onclick = nouvellePartie;
+        // Gestion de la page d'entrée
+        const pseudoInput = document.getElementById('pseudo-input');
+        playBtn.disabled = true;
+        pseudoInput.addEventListener('input', function() {
+            playBtn.disabled = !pseudoInput.value.trim();
+        });
+        playBtn.onclick = function() {
+            const pseudo = pseudoInput.value.trim();
+            if (!pseudo) return;
+            localStorage.setItem('pendu_pseudo', pseudo);
+            entryContainer.style.display = 'none';
+            gameContainer.style.display = 'block';
+            nouvellePartie();
+        };
+        // Gestion du bouton Réalisateur
+        const btnRealisateur = document.getElementById('btn-realisateur');
+        const pageRealisateur = document.getElementById('page-realisateur');
+        const btnRetourAccueil = document.getElementById('btn-retour-accueil');
+        btnRealisateur.onclick = function() {
+            entryContainer.style.display = 'none';
+            pageRealisateur.style.display = 'flex';
+        };
+        btnRetourAccueil.onclick = function() {
+            pageRealisateur.style.display = 'none';
+            entryContainer.style.display = 'flex';
+        };
+        const btnRetourJeu = document.getElementById('btn-retour-jeu');
+        btnRetourJeu.onclick = function() {
+            // Réinitialise l'état du jeu et retourne à l'accueil
+            gameContainer.style.display = 'none';
+            entryContainer.style.display = 'flex';
+            resetChrono();
+            // Optionnel : efface le dessin du pendu et le mot
+            motDiv.textContent = '';
+            penduDrawing.innerHTML = '';
+            messageDiv.textContent = '';
+            lettresDiv.innerHTML = '';
+        };
+        // Gestion du bouton Scores (scoreboard)
+        scoreboardBtn.onclick = showScoreboard;
+        btnFermerScoreboard.onclick = ()=>{scoreboardContainer.style.display='none';};
+        // Bouton reset discret du scoreboard
+        const btnResetScoreboard = document.getElementById('btn-reset-scoreboard');
+        btnResetScoreboard.onclick = function() {
+            localStorage.removeItem('pendu_scores');
+            showScoreboard();
+        };
+        // Suppression des doublons inutiles (fin du script)
+    </script>
+</body>
+</html>
 
