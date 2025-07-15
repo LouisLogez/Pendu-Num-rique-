@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Tableau des scores - BTS SIO</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%);
+            text-align: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            margin-top: 32px;
+            color: #2c3e50;
+            letter-spacing: 2px;
+            font-size: 2.2em;
+        }
+        .score-card {
+            background: rgba(255,255,255,0.97);
+            border-radius: 18px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+            padding: 24px 32px 18px 32px;
+            min-width: 320px;
+            max-width: 95vw;
+            margin: 40px auto 24px auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .score-card h2 {
+            color: #2980b9;
+            margin-top: 0;
+            margin-bottom: 18px;
+            letter-spacing: 1px;
+            font-size: 1.5em;
+        }
+        #scoreForm {
+            margin-bottom: 12px;
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+        #scoreForm input[type="text"], #scoreForm input[type="number"] {
+            border: 1px solid #3498db;
+            border-radius: 4px;
+            padding: 6px 10px;
+            font-size: 1em;
+            outline: none;
+            transition: border 0.2s;
+        }
+        #scoreForm input[type="text"]:focus, #scoreForm input[type="number"]:focus {
+            border: 1.5px solid #2980b9;
+        }
+        #scoreForm button[type="submit"] {
+            background: #27ae60;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background 0.2s;
+        }
+        #scoreForm button[type="submit"]:hover {
+            background: #219150;
+        }
+        #tableauScores {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            background: transparent;
+            box-shadow: none;
+        }
+        #tableauScores th, #tableauScores td {
+            padding: 10px 18px;
+            border: none;
+            font-size: 1.1em;
+        }
+        #tableauScores th {
+            background: #3498db;
+            color: #fff;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        #tableauScores tr:last-child td:first-child {
+            border-bottom-left-radius: 12px;
+        }
+        #tableauScores tr:last-child td:last-child {
+            border-bottom-right-radius: 12px;
+        }
+        #tableauScores tbody tr {
+            transition: background 0.2s;
+        }
+        #tableauScores tbody tr:hover {
+            background: #eaf6fb;
+        }
+        #tableauScores tr:nth-child(even) td {
+            background: #f6fbfd;
+        }
+        #tableauScores tr:nth-child(odd) td {
+            background: #e3f0fa;
+        }
+        #scoreAffiche {
+            margin: 20px 0 30px 0;
+            color: #2980b9;
+            font-size: 1.3em;
+            font-weight: bold;
+            min-height: 1.5em;
+        }
+        @media (max-width: 600px) {
+            .score-card { padding: 10px 2vw 10px 2vw; }
+            #tableauScores th, #tableauScores td { padding: 6px 4px; font-size: 1em; }
+            #scoreForm { flex-direction: column; gap: 6px; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Tableau des scores</h1>
+    <div class="score-card">
+        <h2>Classement</h2>
+        <div id="scoreAffiche"></div>
+        <form id="scoreForm" onsubmit="ajouterScore(event)" style="display:none;">
+            <input type="text" id="pseudo" placeholder="Votre prénom" required>
+            <input type="hidden" id="score" required>
+            <button type="submit">Ajouter</button>
+        </form>
+        <table id="tableauScores">
+            <thead>
+                <tr><th>Prénom</th><th>Score</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <script>
+        // Affiche le score et affiche le formulaire pour l'enregistrement
+        function afficherScoreGagne(score) {
+            document.getElementById("scoreAffiche").textContent = "Votre score : " + score;
+            document.getElementById("score").value = score;
+            document.getElementById("scoreForm").style.display = "flex";
+        }
+
+        // Cache le formulaire tant qu'il n'y a pas de score à enregistrer
+        document.getElementById("scoreForm").style.display = "none";
+
+        function ajouterScore(event) {
+            event.preventDefault();
+            const pseudo = document.getElementById("pseudo").value.trim();
+            const score = parseInt(document.getElementById("score").value, 10);
+            if (!pseudo || isNaN(score)) return;
+            let scores = JSON.parse(localStorage.getItem("penduScores") || "[]");
+            scores.push({ pseudo, score });
+            scores.sort((a, b) => b.score - a.score);
+            scores = scores.slice(0, 10);
+            localStorage.setItem("penduScores", JSON.stringify(scores));
+            afficherScores();
+            document.getElementById("scoreForm").reset();
+            document.getElementById("scoreAffiche").textContent = "";
+            document.getElementById("scoreForm").style.display = "none";
+        }
+
+        function afficherScores() {
+            let scores = JSON.parse(localStorage.getItem("penduScores") || "[]");
+            const tbody = document.querySelector("#tableauScores tbody");
+            tbody.innerHTML = "";
+            for (const s of scores) {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td>${s.pseudo}</td><td>${s.score}</td>`;
+                tbody.appendChild(tr);
+            }
+        }
+
+        // Initialisation
+        afficherScores();
+        // Le formulaire est caché par défaut, il s'affiche via afficherScoreGagne(score)
+        // Pour tester, décommentez la ligne suivante :
+        afficherScoreGagne(42);
+    </script>
+</body>
+</html>
