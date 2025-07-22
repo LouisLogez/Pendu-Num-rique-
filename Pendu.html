@@ -292,6 +292,10 @@
             motSecret = mots[idx];
             lettresTrouvees = [];
             lettresRatees = [];
+            // Ajoute la première lettre comme indice
+            if (motSecret && motSecret.length > 0) {
+                lettresTrouvees.push(motSecret[0]);
+            }
         }
 
         function afficherMot() {
